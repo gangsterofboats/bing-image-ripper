@@ -16,10 +16,9 @@
 # You should have received a copy of the GNU General Public License along with #
 # this program.  If not, see <https://www.gnu.org/licenses/>.                  #
 ################################################################################
-
+require 'http'
 require 'json'
 require 'nokogiri'
-require 'open-uri'
 
 puts ARGV.join(' ')
 file_name = ARGV.join('-') + '.html'
@@ -30,9 +29,12 @@ fh.puts("<!DOCTYPE html>\n<html>\n<head>\n<title>#{ARGV.join(' ')}</title>\n</he
 fh.puts("<h1>#{ARGV.join(' ')}</h1>")
 fh.puts('<br>')
 
-(0..10).each do |i|
-  uri = "https://www.bing.com/images/async?q=#{search}&first=#{(150*i)+1}&count=150&safeSearch=off&size=wallpaper"
-  doc = Nokogiri::HTML(open(uri, 'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36'))
+# http = HTTP.headers('User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36')
+(0..40).each do |i|
+  uri = "https://www.bing.com/images/async?q=#{search}&first=#{(150*i)+1}&count=150&safeSearch=off&size=wallpaper&qft=+filterui:age-lt525600"
+  # uri = "https://www.bing.com/images/async?q=#{search}&first=#{(150*i)+1}&count=150&safeSearch=off&size=wallpaper"
+  result = HTTP.get(uri).to_s
+  doc = Nokogiri::HTML(result)
   content = doc.css('.iusc')
   content.each do |line|
     ijs = JSON.parse(line['m'])
@@ -43,8 +45,8 @@ end
 fh.puts("</body>\n</html>")
 fh.close
 
-# fo = File.readlines(file_name)
-# fo.uniq!
-# File.open(file_name, 'w+') do |fi|
-  # fo.each { |item| fi.write("#{item}") }
-# end
+fo = File.readlines(file_name)
+fo.uniq!
+File.open(file_name, 'w+') do |fi|
+  fo.each { |item| fi.write("#{item}") }
+end
